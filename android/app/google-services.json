@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "514464288152",
+    "project_id": "unicash-8888",
+    "storage_bucket": "unicash-8888.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:514464288152:android:c478f4fac55f52f894efed",
+        "android_client_info": {
+          "package_name": "com.santhoshbalaguru.unicash"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "514464288152-4mifliea8dtrmj1hgk3nmldm3sm96ocr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.santhoshbalaguru.unicash",
+            "certificate_hash": "bb0a8d631eef636fd4787a41affa52f8eae0e265"
+          }
+        },
+        {
+          "client_id": "514464288152-0af42q2fri812of5lv4gc40b4f3qt8lp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDmjyX0TMnRDsisunpgEdJb1wKOneTme8w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "514464288152-0af42q2fri812of5lv4gc40b4f3qt8lp.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "514464288152-i4otvhj2gneoqt65rjkisvnssaqasf4e.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.unicash"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,189 @@
+name: unicash
+description: "multiple budget one app"
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.3
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Animations & UI
+  simple_animations: ^5.0.2
+  sa3_liquid: ^1.0.1
+  animations: ^2.0.11
+  flutter_sticky_header: ^0.8.0        # was ^0.6.5
+  sticky_and_expandable_list: ^1.1.3
+  fl_chart: ^1.2.0                     # was ^0.70.0 — NOTE: breaking API changes, test charts
+
+  # Database
+  drift: ^2.32.1
+  sqlite3_flutter_libs: ^0.5.42        # was ^0.5.24 (0.6.0 is EOL-flagged, stay on 0.5.x)
+  path_provider: ^2.1.5
+  path: ^1.9.0
+
+  # Core utilities
+  math_expressions: ^3.1.0            # was ^2.5.0
+  share_plus: ^12.0.1                 # was ^10.1.2 — NOTE: check share API changes
+  google_sign_in: ^7.2.0              # was ^6.2.2
+  googleapis: ^13.2.0
+  universal_html: ^2.2.4
+  flutter_charset_detector: ^5.0.0
+  auto_size_text: ^3.0.0
+  shared_preferences: ^2.3.5
+  csv: ^6.0.0                         # v8 has breaking changes, staying safe
+  shimmer: ^3.0.0
+  carousel_slider: ^5.0.0
+  url_launcher: ^6.3.2
+  flutter_launcher_icons: ^0.14.3   
+  package_info_plus: ^9.0.0           # was ^8.3.0
+  transparent_image: ^2.0.0
+  pausable_timer: ^3.1.0+3
+  animated_fractionally_sized_box: ^2.0.1
+
+  # Notifications
+  flutter_local_notifications: ^18.0.1  # major versions (19-21) have breaking changes, upgrade separately
+
+  # Theme
+  system_theme: ^3.2.0
+
+  # Firebase — keep all in sync
+  firebase_core: ^3.15.2              # was ^3.13.0 (staying on v3, v4 is a major bump)
+  firebase_auth: ^5.7.0               # was ^5.5.2
+  cloud_firestore: ^5.6.12            # was ^5.6.5
+  firebase_core_web: ^2.24.1          # was ^2.18.1
+  firebase_auth_web: ^5.15.3          # was ^5.13.1
+
+  # Other
+  recaptcha_enterprise_flutter: ^18.5.1
+  sliver_tools: ^0.2.12
+  local_auth: ^2.3.0                  # v3 has breaking changes, upgrade separately
+  timer_builder: ^2.0.0
+  device_info_plus: ^12.3.0           # was ^11.2.0
+  flutter_lazy_indexed_stack: ^0.1.0  # was ^0.0.6
+  app_settings: ^7.0.0               # was ^5.1.1
+  provider: ^6.1.2
+  in_app_review: ^2.0.9
+  flutter_timezone: ^5.0.2            # was ^1.0.8 — NOTE: check timezone API changes
+  device_preview: ^1.2.0
+  scrollable_positioned_list: ^0.3.8
+  easy_localization: ^3.0.7
+  quick_actions: ^1.0.7
+  gradient_borders: ^1.0.1
+  in_app_purchase: ^3.2.0
+  visibility_detector: ^0.4.0+2
+  confetti: ^0.7.0                    # v0.8.0 available but minor, upgrade when ready
+  image_picker: ^1.1.2
+  flutter_displaymode: ^0.7.0         # was ^0.6.0
+  notification_listener_service: ^0.3.4
+  home_widget: ^0.9.0                 # was ^0.7.0
+  material_symbols_icons: ^4.2791.0
+  app_links: ^6.4.1                   # was ^6.3.4 (v7 is a major bump, upgrade separately)
+  expandable_page_view: ^1.0.17
+  flutter_staggered_grid_view: ^0.7.0
+  flutter_colorpicker: ^1.1.0
+  intl: ^0.20.2
+
+  # Git/local packages
+  file_picker: ^8.1.6
+  sliding_sheet:
+    path: ./packages/sliding_sheet-0.5.2-modified/
+  implicitly_animated_reorderable_list:
+    path: ./packages/implicitly_animated_reorderable_list-0.4.2-modified/
+  reorderable_grid_view:
+    git:
+      url: https://github.com/jameskokoska/reorderable_grid_view
+
+  cupertino_icons: ^1.0.9             # was ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  drift_dev: ^2.32.1
+  build_runner: ^2.4.13
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/fonts/
+    - assets/categories/
+    - assets/icon/
+    - assets/landing/
+    - assets/images/
+    - assets/static/
+    - assets/icons/fun/
+    - assets/translations/generated/
+    - assets/static/generated/
+    - assets/static/language-names.json
+
+  # To add custom fonts to your application, add a fonts section here,
+  # in this "flutter" section. Each entry in this list should have a
+  # "family" key with the font family name, and a "fonts" key with a
+  # list giving the asset and other descriptors for the font. For
+  # example:
+  # fonts:
+  #   - family: Schyler
+  #     fonts:
+  #       - asset: fonts/Schyler-Regular.ttf
+  #       - asset: fonts/Schyler-Italic.ttf
+  #         style: italic
+  #   - family: Trajan Pro
+  #     fonts:
+  #       - asset: fonts/TrajanPro.ttf
+  #       - asset: fonts/TrajanPro_Bold.ttf
+  #         weight: 700
+  #
+  # For details regarding fonts from package dependencies,
+  # see https://flutter.dev/custom-fonts/#from-packages
+
+  fonts:
+    - family: Avenir
+      fonts:
+        - asset: assets/fonts/AvenirLTStd-Roman.otf
+        - asset: assets/fonts/AvenirLTStd-Black.otf
+          weight: 700
+    # Inter is the font family fallback
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Regular.ttf
+        - asset: assets/fonts/Inter-Bold.ttf
+          weight: 700
+    - family: DMSans
+      fonts:
+        - asset: assets/fonts/DMSans-Regular.ttf
+        - asset: assets/fonts/DMSans-Bold.ttf
+          weight: 700
+    - family: Metropolis
+      fonts:
+        - asset: assets/fonts/Metropolis-Regular.otf
+        - asset: assets/fonts/Metropolis-Bold.otf
+          weight: 700
+    - family: RobotoCondensed
+      fonts:
+        - asset: assets/fonts/RobotoCondensed-Regular.ttf
+        - asset: assets/fonts/RobotoCondensed-Bold.ttf
+          weight: 700
+    - family: Inconsolata
+      fonts:
+        - asset: assets/fonts/Inconsolata-Regular.ttf
+        - asset: assets/fonts/Inconsolata-Bold.ttf
+          weight: 700
+    - family: Icons
+      fonts:
+        - asset: assets/icons/Icons.ttf
+
+flutter_icons:
+    android: true
+    ios: true
+    image_path: "assets/icon/icon.png"
+    min_sdk_android: 21
+    web:
+      generate: true
+      image_path: "assets/icon/icon-web.png"
+      background_color: "#ffffff"
+      theme_color: "#5f85c2"
