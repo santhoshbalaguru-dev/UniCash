@@ -1,45 +1,45 @@
 {
   "project_info": {
-    "project_number": "514464288152",
-    "project_id": "unicash-8888",
-    "storage_bucket": "unicash-8888.firebasestorage.app"
+    "project_number": "546856549650",
+    "project_id": "unicash-88",
+    "storage_bucket": "unicash-88.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:514464288152:android:c478f4fac55f52f894efed",
+        "mobilesdk_app_id": "1:546856549650:android:66c9a08793d77df89607cb",
         "android_client_info": {
           "package_name": "com.santhoshbalaguru.unicash"
         }
       },
       "oauth_client": [
         {
-          "client_id": "514464288152-4mifliea8dtrmj1hgk3nmldm3sm96ocr.apps.googleusercontent.com",
+          "client_id": "546856549650-68qquo8t9fu99jvrahhujbpk3vm6rfsb.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.santhoshbalaguru.unicash",
-            "certificate_hash": "bb0a8d631eef636fd4787a41affa52f8eae0e265"
+            "certificate_hash": "2f1b9d4b2283d76268350989a93fe428b8881d2a"
           }
         },
         {
-          "client_id": "514464288152-0af42q2fri812of5lv4gc40b4f3qt8lp.apps.googleusercontent.com",
+          "client_id": "546856549650-ddkr75096f17qqtg7i8roo8jv37gbo1q.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDmjyX0TMnRDsisunpgEdJb1wKOneTme8w"
+          "current_key": "AIzaSyCkC1Ie0LIUoHmwLvAVnywBYQNpM7Ys16Y"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "514464288152-0af42q2fri812of5lv4gc40b4f3qt8lp.apps.googleusercontent.com",
+              "client_id": "546856549650-ddkr75096f17qqtg7i8roo8jv37gbo1q.apps.googleusercontent.com",
               "client_type": 3
             },
             {
-              "client_id": "514464288152-i4otvhj2gneoqt65rjkisvnssaqasf4e.apps.googleusercontent.com",
+              "client_id": "546856549650-ioh31jficv6ipufmran1p9od18ae1o8j.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
                 "bundle_id": "com.example.unicash"

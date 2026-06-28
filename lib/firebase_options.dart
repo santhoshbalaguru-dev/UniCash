@@ -41,31 +41,29 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBD1JnNtBTGgM6C_O3MD-hHjLFRBE9wyvo',
-    appId: '1:514464288152:web:10891e6db4e56aae94efed',
-    messagingSenderId: '514464288152',
-    projectId: 'unicash-8888',
-    authDomain: 'unicash-8888.firebaseapp.com',
-    storageBucket: 'unicash-8888.firebasestorage.app',
+    apiKey: 'AIzaSyCPttiLNJh52IfvbXzeqNSDN-D1zw_hC1o',
+    appId: '1:546856549650:web:d3f6afde6f8d76ba9607cb',
+    messagingSenderId: '546856549650',
+    projectId: 'unicash-88',
+    authDomain: 'unicash-88.firebaseapp.com',
+    storageBucket: 'unicash-88.firebasestorage.app',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDmjyX0TMnRDsisunpgEdJb1wKOneTme8w',
-    appId: '1:514464288152:android:c478f4fac55f52f894efed',
-    messagingSenderId: '514464288152',
-    projectId: 'unicash-8888',
-    storageBucket: 'unicash-8888.firebasestorage.app',
+    apiKey: 'AIzaSyCkC1Ie0LIUoHmwLvAVnywBYQNpM7Ys16Y',
+    appId: '1:546856549650:android:66c9a08793d77df89607cb',
+    messagingSenderId: '546856549650',
+    projectId: 'unicash-88',
+    storageBucket: 'unicash-88.firebasestorage.app',
   );
-
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBghLQ8vNwrnRJLVtT8YxCB9s59GMkQzQg',
-    appId: '1:514464288152:ios:212d8215f1bfb3df94efed',
-    messagingSenderId: '514464288152',
-    projectId: 'unicash-8888',
-    storageBucket: 'unicash-8888.firebasestorage.app',
+    apiKey: 'AIzaSyBJHLXHarq06ieHjxCXDmn-K1qygTsEWEU',
+    appId: '1:546856549650:ios:e6328d800c3348449607cb',
+    messagingSenderId: '546856549650',
+    projectId: 'unicash-88',
+    storageBucket: 'unicash-88.firebasestorage.app',
     iosBundleId: 'com.example.unicash',
   );
-
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyBghLQ8vNwrnRJLVtT8YxCB9s59GMkQzQg',
     appId: '1:514464288152:ios:212d8215f1bfb3df94efed',

@@ -12,3 +12,8 @@ GeneratedPluginRegistrant.java
 key.properties
 **/*.keystore
 **/*.jks
+/.agents/
+skills-lock.json
+/.dart_tool/
+/.fvm/
+/.vscode/
