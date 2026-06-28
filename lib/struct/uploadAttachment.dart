@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:unicash/struct/settings.dart';
-import 'package:unicash/widgets/accountAndBackup.dart';
+// import 'package:unicash/widgets/accountAndBackup.dart';
 import 'package:unicash/widgets/globalSnackbar.dart';
 import 'package:unicash/widgets/openPopup.dart';
 import 'package:unicash/widgets/openSnackbar.dart';
@@ -12,94 +12,118 @@ import 'dart:async';
 import 'package:image_picker/image_picker.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
 
+import 'package:unicash/auth/services/gmail_service.dart';
+import 'package:unicash/auth/services/google_auth_service.dart';
+import 'package:unicash/auth/services/backup_service.dart';
+import 'package:unicash/auth/widgets/backup_management.dart';
+import 'package:unicash/auth/services/backup_scheduler.dart';
+import 'package:unicash/auth/services/google_drive_service.dart';
+import 'package:unicash/auth/utils/drive_utils.dart';
+import 'package:unicash/auth/widgets/loading_shimmer_drive_files.dart';
+import 'package:unicash/auth/services/backup_scheduler.dart';
+
 Future<String?> getPhotoAndUpload({required ImageSource source}) async {
-  dynamic result = await openLoadingPopupTryCatch(() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? photo = await picker.pickImage(source: source);
-    if (photo == null) {
-      if (source == ImageSource.camera) throw ("no-photo-taken".tr());
-      if (source == ImageSource.gallery) throw ("no-file-selected".tr());
-      throw ("error-getting-photo");
-    }
+  dynamic result = await openLoadingPopupTryCatch(
+    () async {
+      final ImagePicker picker = ImagePicker();
+      final XFile? photo = await picker.pickImage(source: source);
+      if (photo == null) {
+        if (source == ImageSource.camera) throw ("no-photo-taken".tr());
+        if (source == ImageSource.gallery) throw ("no-file-selected".tr());
+        throw ("error-getting-photo");
+      }
 
-    var fileBytes;
-    late Stream<List<int>> mediaStream;
-    fileBytes = await photo.readAsBytes();
-    mediaStream = Stream.value(List<int>.from(fileBytes));
+      var fileBytes;
+      late Stream<List<int>> mediaStream;
+      fileBytes = await photo.readAsBytes();
+      mediaStream = Stream.value(List<int>.from(fileBytes));
 
-    try {
-      return await uploadFileToDrive(
-          fileBytes: fileBytes, fileName: photo.name, mediaStream: mediaStream);
-    } catch (e) {
-      print(
+      try {
+        return await uploadFileToDrive(
+          fileBytes: fileBytes,
+          fileName: photo.name,
+          mediaStream: mediaStream,
+        );
+      } catch (e) {
+        print(
           "Error uploading file, trying again and requesting new permissions " +
-              e.toString());
-      await signOutGoogle();
-      await signInGoogle(drivePermissionsAttachments: true);
-      return await uploadFileToDrive(
-          fileBytes: fileBytes, fileName: photo.name, mediaStream: mediaStream);
-    }
-  }, onError: (e) {
-    openSnackbar(
-      SnackbarMessage(
-        title: "error-attaching-file".tr(),
-        description: e.toString(),
-        icon: appStateSettings["outlinedIcons"]
-            ? Icons.error_outlined
-            : Icons.error_rounded,
-      ),
-    );
-  });
+              e.toString(),
+        );
+        await signOutGoogle();
+        await signInGoogle(drivePermissionsAttachments: true);
+        return await uploadFileToDrive(
+          fileBytes: fileBytes,
+          fileName: photo.name,
+          mediaStream: mediaStream,
+        );
+      }
+    },
+    onError: (e) {
+      openSnackbar(
+        SnackbarMessage(
+          title: "error-attaching-file".tr(),
+          description: e.toString(),
+          icon: appStateSettings["outlinedIcons"]
+              ? Icons.error_outlined
+              : Icons.error_rounded,
+        ),
+      );
+    },
+  );
   if (result is String) return result;
   return null;
 }
 
 Future<String?> getFileAndUpload() async {
-  dynamic result = await openLoadingPopupTryCatch(() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
-    if (result == null) throw ("no-file-selected".tr());
+  dynamic result = await openLoadingPopupTryCatch(
+    () async {
+      FilePickerResult? result = await FilePicker.platform.pickFiles();
+      if (result == null) throw ("no-file-selected".tr());
 
-    Uint8List fileBytes;
+      Uint8List fileBytes;
 
-    if (kIsWeb) {
-      fileBytes = result.files.single.bytes!;
-    } else {
-      File file = File(result.files.single.path ?? "");
-      fileBytes = await file.readAsBytes();
-    }
+      if (kIsWeb) {
+        fileBytes = result.files.single.bytes!;
+      } else {
+        File file = File(result.files.single.path ?? "");
+        fileBytes = await file.readAsBytes();
+      }
 
-    late Stream<List<int>> mediaStream;
-    mediaStream = Stream.value(fileBytes);
+      late Stream<List<int>> mediaStream;
+      mediaStream = Stream.value(fileBytes);
 
-    try {
-      return await uploadFileToDrive(
-        fileBytes: fileBytes,
-        fileName: result.files.single.name,
-        mediaStream: mediaStream,
-      );
-    } catch (e) {
-      print(
+      try {
+        return await uploadFileToDrive(
+          fileBytes: fileBytes,
+          fileName: result.files.single.name,
+          mediaStream: mediaStream,
+        );
+      } catch (e) {
+        print(
           "Error uploading file, trying again and requesting new permissions " +
-              e.toString());
-      await signOutGoogle();
-      await signInGoogle(drivePermissionsAttachments: true);
-      return await uploadFileToDrive(
-        fileBytes: fileBytes,
-        fileName: result.files.single.name,
-        mediaStream: mediaStream,
+              e.toString(),
+        );
+        await signOutGoogle();
+        await signInGoogle(drivePermissionsAttachments: true);
+        return await uploadFileToDrive(
+          fileBytes: fileBytes,
+          fileName: result.files.single.name,
+          mediaStream: mediaStream,
+        );
+      }
+    },
+    onError: (e) {
+      openSnackbar(
+        SnackbarMessage(
+          title: "error-attaching-file".tr(),
+          description: e.toString(),
+          icon: appStateSettings["outlinedIcons"]
+              ? Icons.error_outlined
+              : Icons.error_rounded,
+        ),
       );
-    }
-  }, onError: (e) {
-    openSnackbar(
-      SnackbarMessage(
-        title: "error-attaching-file".tr(),
-        description: e.toString(),
-        icon: appStateSettings["outlinedIcons"]
-            ? Icons.error_outlined
-            : Icons.error_rounded,
-      ),
-    );
-  });
+    },
+  );
   if (result is String) return result;
   return null;
 }
@@ -118,7 +142,8 @@ Future<String?> uploadFileToDrive({
 
   String folderName = "unicash";
   drive.FileList list = await driveApi.files.list(
-      q: "mimeType='application/vnd.google-apps.folder' and name='$folderName'");
+    q: "mimeType='application/vnd.google-apps.folder' and name='$folderName'",
+  );
   String? folderId;
   for (var file in list.files!) {
     if (file.name == folderName) {
@@ -146,8 +171,10 @@ Future<String?> uploadFileToDrive({
   driveFile.modifiedTime = DateTime.now().toUtc();
   driveFile.parents = [folderId];
 
-  drive.File driveFileCreated =
-      await driveApi.files.create(driveFile, uploadMedia: media);
+  drive.File driveFileCreated = await driveApi.files.create(
+    driveFile,
+    uploadMedia: media,
+  );
 
   // Only if we want attachments to be publicly available
   // drive.Permission permission = drive.Permission();
@@ -159,8 +186,12 @@ Future<String?> uploadFileToDrive({
   // );
 
   // Retrieve the updated metadata for the file with permissions
-  drive.File fileOnDrive = await driveApi.files.get(driveFileCreated.id!,
-      $fields: "id, name, webViewLink, permissions") as drive.File;
+  drive.File fileOnDrive =
+      await driveApi.files.get(
+            driveFileCreated.id!,
+            $fields: "id, name, webViewLink, permissions",
+          )
+          as drive.File;
 
   return fileOnDrive.webViewLink;
 }

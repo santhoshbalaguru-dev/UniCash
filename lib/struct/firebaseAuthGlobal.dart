@@ -1,8 +1,18 @@
 import 'package:unicash/struct/settings.dart';
-import 'package:unicash/widgets/accountAndBackup.dart';
+// import 'package:unicash/widgets/accountAndBackup.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart' hide Transaction;
+
+import 'package:unicash/auth/services/gmail_service.dart';
+import 'package:unicash/auth/services/google_auth_service.dart';
+import 'package:unicash/auth/services/backup_service.dart';
+import 'package:unicash/auth/widgets/backup_management.dart';
+import 'package:unicash/auth/services/backup_scheduler.dart';
+import 'package:unicash/auth/services/google_drive_service.dart';
+import 'package:unicash/auth/utils/drive_utils.dart';
+import 'package:unicash/auth/widgets/loading_shimmer_drive_files.dart';
+import 'package:unicash/auth/services/backup_scheduler.dart';
 
 OAuthCredential? _credential;
 
@@ -44,19 +54,23 @@ Future<FirebaseFirestore?> firebaseGetDBInstance() async {
       }
       // GoogleSignInAccount? googleUser = googleUser;
 
-final idToken = googleUser?.authentication.idToken;
-final auth = await googleUser?.authorizationClient
-    .authorizeScopes(['email', 'profile']);
+      final idToken = googleUser?.authentication.idToken;
+      final auth = await googleUser?.authorizationClient.authorizeScopes([
+        'email',
+        'profile',
+      ]);
 
       _credential = GoogleAuthProvider.credential(
         accessToken: auth?.accessToken,
-        idToken: idToken, 
+        idToken: idToken,
       );
 
       await FirebaseAuth.instance.signInWithCredential(_credential!);
       updateSettings(
-          "currentUserEmail", FirebaseAuth.instance.currentUser!.email,
-          updateGlobalState: true);
+        "currentUserEmail",
+        FirebaseAuth.instance.currentUser!.email,
+        updateGlobalState: true,
+      );
       return FirebaseFirestore.instance;
     } catch (e) {
       print("There was an error with firebase login and possibly google");

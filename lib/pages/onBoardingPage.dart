@@ -5,7 +5,7 @@ import 'package:unicash/pages/addBudgetPage.dart';
 import 'package:unicash/struct/databaseGlobal.dart';
 import 'package:unicash/struct/languageMap.dart';
 import 'package:unicash/struct/settings.dart';
-import 'package:unicash/widgets/accountAndBackup.dart';
+// import 'package:unicash/widgets/accountAndBackup.dart';
 import 'package:unicash/widgets/button.dart';
 import 'package:unicash/widgets/currencyPicker.dart';
 import 'package:unicash/widgets/framework/popupFramework.dart';
@@ -25,6 +25,15 @@ import 'package:unicash/functions.dart';
 import 'package:unicash/database/initializeDefaultDatabase.dart';
 
 import 'package:unicash/widgets/pageIndicator.dart';
+import 'package:unicash/auth/services/gmail_service.dart';
+import 'package:unicash/auth/services/google_auth_service.dart';
+import 'package:unicash/auth/services/backup_service.dart';
+import 'package:unicash/auth/widgets/backup_management.dart';
+import 'package:unicash/auth/services/backup_scheduler.dart';
+import 'package:unicash/auth/services/google_drive_service.dart';
+import 'package:unicash/auth/utils/drive_utils.dart';
+import 'package:unicash/auth/widgets/loading_shimmer_drive_files.dart';
+import 'package:unicash/auth/services/backup_scheduler.dart';
 
 class OnBoardingPage extends StatelessWidget {
   const OnBoardingPage({
@@ -39,10 +48,12 @@ class OnBoardingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        resizeToAvoidBottomInset: false,
-        body: OnBoardingPageBody(
-            popNavigationWhenDone: popNavigationWhenDone,
-            showPreviewDemoButton: showPreviewDemoButton));
+      resizeToAvoidBottomInset: false,
+      body: OnBoardingPageBody(
+        popNavigationWhenDone: popNavigationWhenDone,
+        showPreviewDemoButton: showPreviewDemoButton,
+      ),
+    );
   }
 }
 
@@ -114,7 +125,7 @@ class OnBoardingPageBodyState extends State<OnBoardingPageBody> {
                     BudgetTransactionFilters.includeIncome,
                     BudgetTransactionFilters.addedToOtherBudget,
                     BudgetTransactionFilters.addedToObjective,
-                  ])
+                  ]),
           ],
           income: false,
           archived: false,
@@ -129,8 +140,12 @@ class OnBoardingPageBodyState extends State<OnBoardingPageBody> {
     if (widget.popNavigationWhenDone) {
       popRoute(context);
     } else {
-      updateSettings("hasOnboarded", true,
-          pagesNeedingRefresh: [], updateGlobalState: true);
+      updateSettings(
+        "hasOnboarded",
+        true,
+        pagesNeedingRefresh: [],
+        updateGlobalState: true,
+      );
     }
   }
 
@@ -140,19 +155,22 @@ class OnBoardingPageBodyState extends State<OnBoardingPageBody> {
   @override
   void initState() {
     super.initState();
-    _focusAttachment = _focusNode.attach(context, onKeyEvent: (node, event) {
-      if (event.logicalKey.keyLabel == "Go Back" ||
-          event.logicalKey == LogicalKeyboardKey.escape) {
-        if (widget.popNavigationWhenDone) nextNavigation();
-      } else if (event.runtimeType == KeyDownEvent &&
-          event.logicalKey == LogicalKeyboardKey.arrowRight) {
-        nextOnBoardPage();
-      } else if (event.runtimeType == KeyDownEvent &&
-          event.logicalKey == LogicalKeyboardKey.arrowLeft) {
-        previousOnBoardPage();
-      }
-      return KeyEventResult.handled;
-    });
+    _focusAttachment = _focusNode.attach(
+      context,
+      onKeyEvent: (node, event) {
+        if (event.logicalKey.keyLabel == "Go Back" ||
+            event.logicalKey == LogicalKeyboardKey.escape) {
+          if (widget.popNavigationWhenDone) nextNavigation();
+        } else if (event.runtimeType == KeyDownEvent &&
+            event.logicalKey == LogicalKeyboardKey.arrowRight) {
+          nextOnBoardPage();
+        } else if (event.runtimeType == KeyDownEvent &&
+            event.logicalKey == LogicalKeyboardKey.arrowLeft) {
+          previousOnBoardPage();
+        }
+        return KeyEventResult.handled;
+      },
+    );
     _focusNode.requestFocus();
 
     Future.delayed(Duration.zero, () async {
@@ -231,10 +249,12 @@ class OnBoardingPageBodyState extends State<OnBoardingPageBody> {
         widgets: [
           Container(
             constraints: BoxConstraints(
-                maxWidth: MediaQuery.sizeOf(context).height <=
-                        MediaQuery.sizeOf(context).width
-                    ? MediaQuery.sizeOf(context).height * 0.5
-                    : 300),
+              maxWidth:
+                  MediaQuery.sizeOf(context).height <=
+                      MediaQuery.sizeOf(context).width
+                  ? MediaQuery.sizeOf(context).height * 0.5
+                  : 300,
+            ),
             child: imageLanding1,
           ),
           SizedBox(height: 15),
@@ -261,19 +281,19 @@ class OnBoardingPageBodyState extends State<OnBoardingPageBody> {
           SizedBox(height: 55),
         ],
         bottomWidget: widget.showPreviewDemoButton
-            ? PreviewDemoButton(
-                nextNavigation: nextNavigation,
-              )
+            ? PreviewDemoButton(nextNavigation: nextNavigation)
             : null,
       ),
       OnBoardPage(
         widgets: [
           Container(
             constraints: BoxConstraints(
-                maxWidth: MediaQuery.sizeOf(context).height <=
-                        MediaQuery.sizeOf(context).width
-                    ? MediaQuery.sizeOf(context).height * 0.5
-                    : 300),
+              maxWidth:
+                  MediaQuery.sizeOf(context).height <=
+                      MediaQuery.sizeOf(context).width
+                  ? MediaQuery.sizeOf(context).height * 0.5
+                  : 300,
+            ),
             child: imageLanding2,
           ),
           SizedBox(height: 15),
@@ -321,6 +341,7 @@ class OnBoardingPageBodyState extends State<OnBoardingPageBody> {
             },
             initialSelectedEndDate: selectedEndDate,
           ),
+
           // This is pretty confusing, users can enable this later by editing the budget
           // Opacity(
           //   opacity: 0.8,
@@ -342,12 +363,12 @@ class OnBoardingPageBodyState extends State<OnBoardingPageBody> {
           //     },
           //   ),
           // ),
-
           StreamBuilder<AllWallets>(
             stream: database.watchAllWalletsIndexed(),
             builder: (context, snapshot) {
               TransactionWallet? primaryWallet = snapshot
-                  .data?.indexedByPk[appStateSettings["selectedWalletPk"]];
+                  .data
+                  ?.indexedByPk[appStateSettings["selectedWalletPk"]];
               if (primaryWallet != null) {
                 return Padding(
                   padding: const EdgeInsetsDirectional.only(top: 15),
@@ -356,8 +377,7 @@ class OnBoardingPageBodyState extends State<OnBoardingPageBody> {
                       openBottomSheet(
                         context,
                         SizedBox.shrink(),
-                        customBuilder:
-                            (context2, scrollController, sheetState) {
+                        customBuilder: (context2, scrollController, sheetState) {
                           return CustomScrollView(
                             controller: scrollController,
                             slivers: [
@@ -376,8 +396,10 @@ class OnBoardingPageBodyState extends State<OnBoardingPageBody> {
                                 onSelected: (selectedCurrency) {
                                   popRoute(context);
                                   database.createOrUpdateWallet(
-                                      primaryWallet.copyWith(
-                                          currency: Value(selectedCurrency)));
+                                    primaryWallet.copyWith(
+                                      currency: Value(selectedCurrency),
+                                    ),
+                                  );
                                 },
                                 initialCurrency: primaryWallet.currency,
                                 onHasFocus: () {
@@ -419,10 +441,12 @@ class OnBoardingPageBodyState extends State<OnBoardingPageBody> {
         widgets: [
           Container(
             constraints: BoxConstraints(
-                maxWidth: MediaQuery.sizeOf(context).height <=
-                        MediaQuery.sizeOf(context).width
-                    ? MediaQuery.sizeOf(context).height * 0.5
-                    : 300),
+              maxWidth:
+                  MediaQuery.sizeOf(context).height <=
+                      MediaQuery.sizeOf(context).width
+                  ? MediaQuery.sizeOf(context).height * 0.5
+                  : 300,
+            ),
             child: imageLanding3,
           ),
           SizedBox(height: 15),
@@ -440,8 +464,9 @@ class OnBoardingPageBodyState extends State<OnBoardingPageBody> {
           getPlatform() == PlatformOS.isIOS
               ? IntrinsicWidth(
                   child: Padding(
-                    padding:
-                        const EdgeInsetsDirectional.symmetric(horizontal: 8.0),
+                    padding: const EdgeInsetsDirectional.symmetric(
+                      horizontal: 8.0,
+                    ),
                     child: Button(
                       label: "lets-go".tr(),
                       onTap: () {
@@ -471,9 +496,11 @@ class OnBoardingPageBodyState extends State<OnBoardingPageBody> {
                         if (appStateSettings["username"] == "" &&
                             googleUser != null) {
                           updateSettings(
-                              "username", googleUser?.displayName ?? "",
-                              pagesNeedingRefresh: [0],
-                              updateGlobalState: false);
+                            "username",
+                            googleUser?.displayName ?? "",
+                            pagesNeedingRefresh: [0],
+                            updateGlobalState: false,
+                          );
                         }
                         // If user has sync backups, but no real backups it will show up here
                         // For now disable restoring of a backup popup, the sync backups will be restored automatically using the function call below
@@ -514,19 +541,18 @@ class OnBoardingPageBodyState extends State<OnBoardingPageBody> {
 
                         // set this to true so cloud functions run
                         entireAppLoaded = true;
-                        await runAllCloudFunctions(
-                          context,
-                          forceSignIn: true,
-                        );
+                        await runAllCloudFunctions(context, forceSignIn: true);
 
                         nextNavigation();
-                        loadingIndeterminateKey.currentState
-                            ?.setVisibility(false);
+                        loadingIndeterminateKey.currentState?.setVisibility(
+                          false,
+                        );
                       },
                       onError: (e) {
                         print("Error signing in: " + e.toString());
-                        loadingIndeterminateKey.currentState
-                            ?.setVisibility(false);
+                        loadingIndeterminateKey.currentState?.setVisibility(
+                          false,
+                        );
                       },
                     );
                   },
@@ -540,8 +566,9 @@ class OnBoardingPageBodyState extends State<OnBoardingPageBody> {
           getPlatform() == PlatformOS.isIOS
               ? SizedBox.shrink()
               : Padding(
-                  padding:
-                      const EdgeInsetsDirectional.symmetric(horizontal: 25),
+                  padding: const EdgeInsetsDirectional.symmetric(
+                    horizontal: 25,
+                  ),
                   child: TextFont(
                     text: "onboarding-info-3".tr(),
                     textAlign: TextAlign.center,
@@ -577,10 +604,7 @@ class OnBoardingPageBodyState extends State<OnBoardingPageBody> {
 
     return Stack(
       children: [
-        PageView(
-          controller: controller,
-          children: children,
-        ),
+        PageView(controller: controller, children: children),
         PositionedDirectional(
           bottom: 0,
           child: IgnorePointer(
@@ -605,7 +629,8 @@ class OnBoardingPageBodyState extends State<OnBoardingPageBody> {
           alignment: AlignmentDirectional.bottomCenter,
           child: Padding(
             padding: EdgeInsetsDirectional.only(
-                bottom: MediaQuery.viewPaddingOf(context).bottom),
+              bottom: MediaQuery.viewPaddingOf(context).bottom,
+            ),
             child: Padding(
               padding: const EdgeInsetsDirectional.symmetric(
                 horizontal: 18,
@@ -629,11 +654,11 @@ class OnBoardingPageBodyState extends State<OnBoardingPageBody> {
                             },
                             icon: getPlatform() == PlatformOS.isIOS
                                 ? appStateSettings["outlinedIcons"]
-                                    ? Icons.chevron_left_outlined
-                                    : Icons.chevron_left_rounded
+                                      ? Icons.chevron_left_outlined
+                                      : Icons.chevron_left_rounded
                                 : appStateSettings["outlinedIcons"]
-                                    ? Icons.arrow_back_outlined
-                                    : Icons.arrow_back_rounded,
+                                ? Icons.arrow_back_outlined
+                                : Icons.arrow_back_rounded,
                             size: 50,
                             padding: getIsFullScreen(context) == false
                                 ? EdgeInsetsDirectional.all(3)
@@ -643,7 +668,9 @@ class OnBoardingPageBodyState extends State<OnBoardingPageBody> {
                       },
                     ),
                     PageIndicator(
-                        controller: controller, itemCount: children.length),
+                      controller: controller,
+                      itemCount: children.length,
+                    ),
                     AnimatedBuilder(
                       animation: controller,
                       builder: (BuildContext context, Widget? child) {
@@ -653,18 +680,18 @@ class OnBoardingPageBodyState extends State<OnBoardingPageBody> {
                           opacity: getPlatform() == PlatformOS.isIOS
                               ? 1
                               : currentIndex >= children.length - 1
-                                  ? 0
-                                  : 1,
+                              ? 0
+                              : 1,
                           duration: Duration(milliseconds: 200),
                           child: ButtonIcon(
                             onTap: () => nextOnBoardPage(),
                             icon: getPlatform() == PlatformOS.isIOS
                                 ? appStateSettings["outlinedIcons"]
-                                    ? Icons.chevron_right_outlined
-                                    : Icons.chevron_right_rounded
+                                      ? Icons.chevron_right_outlined
+                                      : Icons.chevron_right_rounded
                                 : appStateSettings["outlinedIcons"]
-                                    ? Icons.arrow_forward_outlined
-                                    : Icons.arrow_forward_rounded,
+                                ? Icons.arrow_forward_outlined
+                                : Icons.arrow_forward_rounded,
                             size: 50,
                             padding: getIsFullScreen(context) == false
                                 ? EdgeInsetsDirectional.all(3)
@@ -686,7 +713,7 @@ class OnBoardingPageBodyState extends State<OnBoardingPageBody> {
 
 class OnBoardPage extends StatelessWidget {
   const OnBoardPage({Key? key, required this.widgets, this.bottomWidget})
-      : super(key: key);
+    : super(key: key);
   final List<Widget> widgets;
   final Widget? bottomWidget;
   @override
@@ -716,7 +743,8 @@ class OnBoardPage extends StatelessWidget {
         ),
         Padding(
           padding: EdgeInsetsDirectional.only(
-              bottom: 60 + MediaQuery.paddingOf(context).bottom),
+            bottom: 60 + MediaQuery.paddingOf(context).bottom,
+          ),
           child: Align(
             alignment: AlignmentDirectional.bottomCenter,
             child: bottomWidget ?? SizedBox.shrink(),

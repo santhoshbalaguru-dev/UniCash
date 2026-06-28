@@ -1,7 +1,7 @@
 import 'package:unicash/colors.dart';
 import 'package:unicash/functions.dart';
 import 'package:unicash/struct/settings.dart';
-import 'package:unicash/widgets/accountAndBackup.dart';
+// import 'package:unicash/widgets/accountAndBackup.dart';
 import 'package:unicash/widgets/navigationFramework.dart';
 import 'package:unicash/widgets/navigationSidebar.dart';
 import 'package:unicash/widgets/transactionEntry/swipeToSelectTransactions.dart';
@@ -10,6 +10,16 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:timer_builder/timer_builder.dart';
+
+import 'package:unicash/auth/services/gmail_service.dart';
+import 'package:unicash/auth/services/google_auth_service.dart';
+import 'package:unicash/auth/services/backup_service.dart';
+import 'package:unicash/auth/widgets/backup_management.dart';
+import 'package:unicash/auth/services/backup_scheduler.dart';
+import 'package:unicash/auth/services/google_drive_service.dart';
+import 'package:unicash/auth/utils/drive_utils.dart';
+import 'package:unicash/auth/widgets/loading_shimmer_drive_files.dart';
+import 'package:unicash/auth/services/backup_scheduler.dart';
 
 bool enableSwipeDownToRefresh(BuildContext context) {
   return selectingTransactionsActive == 0 &&
@@ -154,10 +164,7 @@ class _PullDownToRefreshSyncState extends State<PullDownToRefreshSync>
           animation: curvedAnimation,
           builder: (context, child) {
             return Transform.translate(
-              offset: Offset(
-                0,
-                maxDrag * curvedAnimation.value,
-              ),
+              offset: Offset(0, maxDrag * curvedAnimation.value),
               child: Listener(
                 onPointerMove: (ptr) => {_onPointerMove(ptr)},
                 onPointerUp: (ptr) => {_onPointerUp(ptr)},
@@ -173,23 +180,31 @@ class _PullDownToRefreshSyncState extends State<PullDownToRefreshSync>
           builder: (context, child) {
             return Transform.translate(
               offset: Offset(
-                  0,
-                  -(maxDrag + MediaQuery.viewPaddingOf(context).top) *
-                      (1 - curvedAnimation.value)),
+                0,
+                -(maxDrag + MediaQuery.viewPaddingOf(context).top) *
+                    (1 - curvedAnimation.value),
+              ),
               child: Column(
                 children: [
                   Container(
                     padding: EdgeInsetsDirectional.only(
-                        top: MediaQuery.viewPaddingOf(context).top),
+                      top: MediaQuery.viewPaddingOf(context).top,
+                    ),
                     height: maxDrag + MediaQuery.viewPaddingOf(context).top,
                     width: double.infinity,
                     color: appStateSettings["materialYou"]
-                        ? dynamicPastel(context,
+                        ? dynamicPastel(
+                            context,
                             Theme.of(context).colorScheme.secondaryContainer,
-                            amountLight: 0.3, amountDark: 0.65)
+                            amountLight: 0.3,
+                            amountDark: 0.65,
+                          )
                         : dynamicPastel(
-                            context, getColor(context, "lightDarkAccent"),
-                            amountLight: 0.1, amountDark: 0.3),
+                            context,
+                            getColor(context, "lightDarkAccent"),
+                            amountLight: 0.1,
+                            amountDark: 0.3,
+                          ),
                     child: TimerBuilder.periodic(
                       Duration(seconds: 5),
                       builder: (context) {
@@ -200,7 +215,8 @@ class _PullDownToRefreshSyncState extends State<PullDownToRefreshSync>
                             textColor: getColor(context, "textLight"),
                             fontSize: 13,
                             maxLines: 3,
-                            text: "synced".tr().capitalizeFirst +
+                            text:
+                                "synced".tr().capitalizeFirst +
                                 " " +
                                 (dateTimeLastSynced == null
                                     ? "never".tr()
@@ -216,8 +232,11 @@ class _PullDownToRefreshSyncState extends State<PullDownToRefreshSync>
                     child: Container(
                       height: 2,
                       color: dynamicPastel(
-                          context, Theme.of(context).colorScheme.primary,
-                          amountLight: 0.5, amountDark: 0.55),
+                        context,
+                        Theme.of(context).colorScheme.primary,
+                        amountLight: 0.5,
+                        amountDark: 0.55,
+                      ),
                       child: Container(),
                     ),
                   ),

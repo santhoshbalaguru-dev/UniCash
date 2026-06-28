@@ -3,7 +3,7 @@ import 'package:unicash/functions.dart';
 import 'package:unicash/main.dart';
 import 'package:unicash/pages/addTransactionPage.dart';
 import 'package:unicash/struct/settings.dart';
-import 'package:unicash/widgets/accountAndBackup.dart';
+// import 'package:unicash/widgets/accountAndBackup.dart';
 import 'package:unicash/widgets/animatedExpanded.dart';
 import 'package:unicash/widgets/button.dart';
 import 'package:unicash/widgets/dropdownSelect.dart';
@@ -23,6 +23,16 @@ import 'package:flutter/material.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:unicash/widgets/extraInfoBoxes.dart';
 import 'package:unicash/widgets/outlinedButtonStacked.dart';
+
+import 'package:unicash/auth/services/gmail_service.dart';
+import 'package:unicash/auth/services/google_auth_service.dart';
+import 'package:unicash/auth/services/backup_service.dart';
+import 'package:unicash/auth/widgets/backup_management.dart';
+import 'package:unicash/auth/services/backup_scheduler.dart';
+import 'package:unicash/auth/services/google_drive_service.dart';
+import 'package:unicash/auth/utils/drive_utils.dart';
+import 'package:unicash/auth/widgets/loading_shimmer_drive_files.dart';
+import 'package:unicash/auth/services/backup_scheduler.dart';
 
 class AccountsPage extends StatefulWidget {
   const AccountsPage({Key? key}) : super(key: key);
@@ -45,18 +55,25 @@ class AccountsPageState extends State<AccountsPage> {
       height: 100,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: dynamicPastel(context, Theme.of(context).colorScheme.primary,
-            amount: 0.2),
+        color: dynamicPastel(
+          context,
+          Theme.of(context).colorScheme.primary,
+          amount: 0.2,
+        ),
       ),
       child: Center(
         child: TextFont(
-            text: googleUser?.displayName![0] ?? "",
-            fontSize: 60,
-            textAlign: TextAlign.center,
-            fontWeight: FontWeight.bold,
-            textColor: dynamicPastel(
-                context, Theme.of(context).colorScheme.primary,
-                amount: 0.85, inverse: false)),
+          text: googleUser?.displayName![0] ?? "",
+          fontSize: 60,
+          textAlign: TextAlign.center,
+          fontWeight: FontWeight.bold,
+          textColor: dynamicPastel(
+            context,
+            Theme.of(context).colorScheme.primary,
+            amount: 0.85,
+            inverse: false,
+          ),
+        ),
       ),
     );
     return PageFramework(
@@ -97,7 +114,8 @@ class AccountsPageState extends State<AccountsPage> {
                     onExtraLabel2: "read-more-here".tr(),
                     onExtra2: () {
                       openUrl(
-                          "https://pub.dev/packages/google_sign_in_web#differences-between-google-identity-services-sdk-and-google-sign-in-for-web-sdk");
+                        "https://pub.dev/packages/google_sign_in_web#differences-between-google-identity-services-sdk-and-google-sign-in-for-web-sdk",
+                      );
                     },
                     onSubmit: () {
                       popRoute(context);
@@ -128,7 +146,7 @@ class AccountsPageState extends State<AccountsPage> {
                         onTap: () async {
                           await signInAndSync(context, next: () {});
                         },
-                      )
+                      ),
                     ],
                   )
                 : Column(
@@ -149,23 +167,29 @@ class AccountsPageState extends State<AccountsPage> {
                               ),
                             )
                           : ClipOval(
-                              child: googleUser == null ||
+                              child:
+                                  googleUser == null ||
                                       googleUser!.photoUrl == null
                                   ? profileWidget
                                   : FadeInImage.memoryNetwork(
-                                      fadeInDuration:
-                                          Duration(milliseconds: 100),
-                                      fadeOutDuration:
-                                          Duration(milliseconds: 100),
+                                      fadeInDuration: Duration(
+                                        milliseconds: 100,
+                                      ),
+                                      fadeOutDuration: Duration(
+                                        milliseconds: 100,
+                                      ),
                                       placeholder: kTransparentImage,
                                       image: googleUser!.photoUrl.toString(),
                                       height: 95,
                                       width: 95,
-                                      imageErrorBuilder: (BuildContext context,
-                                          Object exception,
-                                          StackTrace? stackTrace) {
-                                        return profileWidget;
-                                      },
+                                      imageErrorBuilder:
+                                          (
+                                            BuildContext context,
+                                            Object exception,
+                                            StackTrace? stackTrace,
+                                          ) {
+                                            return profileWidget;
+                                          },
                                     ),
                             ),
                       SizedBox(height: 10),
@@ -202,14 +226,17 @@ class AccountsPageState extends State<AccountsPage> {
                             }
                           },
                           padding: EdgeInsetsDirectional.symmetric(
-                              horizontal: 17, vertical: 12),
+                            horizontal: 17,
+                            vertical: 12,
+                          ),
                           fontSize: 15,
                         ),
                       ),
                       SizedBox(height: 25),
                       Padding(
                         padding: const EdgeInsetsDirectional.symmetric(
-                            horizontal: 18.0),
+                          horizontal: 18.0,
+                        ),
                         child: Row(
                           children: [
                             Expanded(
@@ -231,8 +258,10 @@ class AccountsPageState extends State<AccountsPage> {
                                       setState(() {
                                         currentlyExporting = true;
                                       });
-                                      await createBackup(context,
-                                          deleteOldBackups: true);
+                                      await createBackup(
+                                        context,
+                                        deleteOldBackups: true,
+                                      );
                                       if (mounted)
                                         setState(() {
                                           currentlyExporting = false;
@@ -260,14 +289,18 @@ class AccountsPageState extends State<AccountsPage> {
                       SizedBox(height: 15),
                       Padding(
                         padding: const EdgeInsetsDirectional.symmetric(
-                            horizontal: 18.0),
+                          horizontal: 18.0,
+                        ),
                         child: Row(
                           children: [
                             Expanded(
                               child: SyncCloudBackupButton(
                                 onTap: () async {
-                                  chooseBackup(context,
-                                      isManaging: true, isClientSync: true);
+                                  chooseBackup(
+                                    context,
+                                    isManaging: true,
+                                    isClientSync: true,
+                                  );
                                 },
                               ),
                             ),
@@ -285,16 +318,20 @@ class AccountsPageState extends State<AccountsPage> {
                       if (kIsWeb)
                         TipBox(
                           padding: const EdgeInsetsDirectional.symmetric(
-                              vertical: 20, horizontal: 7),
+                            vertical: 20,
+                            horizontal: 7,
+                          ),
                           settingsString: "autoLoginDisabledOnWebTip",
                           onTap: () {
                             openUrl(
-                                "https://pub.dev/packages/google_sign_in_web#differences-between-google-identity-services-sdk-and-google-sign-in-for-web-sdk");
+                              "https://pub.dev/packages/google_sign_in_web#differences-between-google-identity-services-sdk-and-google-sign-in-for-web-sdk",
+                            );
                           },
                           text: "",
                           richTextSpan: [
                             TextSpan(
-                              text: "why-is-auto-login-disabled-on-web".tr() +
+                              text:
+                                  "why-is-auto-login-disabled-on-web".tr() +
                                   " ",
                               style: TextStyle(
                                 color: getColor(context, "black"),
@@ -307,11 +344,14 @@ class AccountsPageState extends State<AccountsPage> {
                               style: TextStyle(
                                 decoration: TextDecoration.underline,
                                 decorationStyle: TextDecorationStyle.solid,
-                                decorationColor:
-                                    getColor(context, "unPaidOverdue")
-                                        .withOpacity(0.8),
-                                color: getColor(context, "unPaidOverdue")
-                                    .withOpacity(0.8),
+                                decorationColor: getColor(
+                                  context,
+                                  "unPaidOverdue",
+                                ).withOpacity(0.8),
+                                color: getColor(
+                                  context,
+                                  "unPaidOverdue",
+                                ).withOpacity(0.8),
                                 fontFamily: appStateSettings["font"],
                                 fontFamilyFallback: ['Inter'],
                               ),
@@ -346,20 +386,25 @@ class AccountsPageState extends State<AccountsPage> {
                               appStateSettings["showExtraInfoText"] != false
                           ? Padding(
                               padding: const EdgeInsetsDirectional.symmetric(
-                                  vertical: 20, horizontal: 7),
+                                vertical: 20,
+                                horizontal: 7,
+                              ),
                               child: Tappable(
                                 borderRadius: 15,
                                 onTap: () {
                                   openUrl(
-                                      "https://cashewapp.web.app/policy.html");
+                                    "https://cashewapp.web.app/policy.html",
+                                  );
                                 },
                                 child: Padding(
                                   padding:
                                       const EdgeInsetsDirectional.symmetric(
-                                          horizontal: 8, vertical: 10),
+                                        horizontal: 8,
+                                        vertical: 10,
+                                      ),
                                   child: TextFont(
-                                    text:
-                                        "google-drive-backup-description".tr(),
+                                    text: "google-drive-backup-description"
+                                        .tr(),
                                     textAlign: TextAlign.center,
                                     fontSize: 14,
                                     maxLines: 10,
@@ -390,11 +435,11 @@ class SyncCloudBackupButton extends StatelessWidget {
           : "sync".tr(),
       iconData: getPlatform() == PlatformOS.isIOS
           ? appStateSettings["outlinedIcons"]
-              ? Icons.devices_outlined
-              : Icons.devices_rounded
+                ? Icons.devices_outlined
+                : Icons.devices_rounded
           : appStateSettings["outlinedIcons"]
-              ? Icons.cloud_sync_outlined
-              : Icons.cloud_sync_rounded,
+          ? Icons.cloud_sync_outlined
+          : Icons.cloud_sync_rounded,
       onTap: onTap,
     );
   }
@@ -423,7 +468,8 @@ class EnableSignInWithGoogleFlyIn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (appStateSettings["enableGoogleLoginFlyIn"] != true ||
-        getIsFullScreen(context) == false) return SizedBox.shrink();
+        getIsFullScreen(context) == false)
+      return SizedBox.shrink();
     return const SignInWithGoogleFlyIn();
   }
 }
@@ -479,8 +525,9 @@ class _SignInWithGoogleFlyInState extends State<SignInWithGoogleFlyIn> {
                   constraints: BoxConstraints(maxWidth: 400),
                   child: Container(
                     decoration: BoxDecoration(
-                      borderRadius:
-                          BorderRadiusDirectional.all(Radius.circular(13)),
+                      borderRadius: BorderRadiusDirectional.all(
+                        Radius.circular(13),
+                      ),
                       color: getColor(context, "lightDarkAccentHeavyLight"),
                       boxShadow: boxShadowCheck(boxShadowSharp(context)),
                     ),
@@ -514,10 +561,7 @@ class _SignInWithGoogleFlyInState extends State<SignInWithGoogleFlyIn> {
                                 children: [
                                   Row(
                                     children: [
-                                      Icon(
-                                        MoreIcons.google,
-                                        size: 25,
-                                      ),
+                                      Icon(MoreIcons.google, size: 25),
                                       SizedBox(width: 10),
                                       TextFont(
                                         text: "sign-in-with-google".tr(),
@@ -528,12 +572,13 @@ class _SignInWithGoogleFlyInState extends State<SignInWithGoogleFlyIn> {
                                   ),
                                   Padding(
                                     padding: const EdgeInsetsDirectional.only(
-                                        start: 18.0),
+                                      start: 18.0,
+                                    ),
                                     child: IconButtonScaled(
                                       iconData:
                                           appStateSettings["outlinedIcons"]
-                                              ? Icons.close_outlined
-                                              : Icons.close_rounded,
+                                          ? Icons.close_outlined
+                                          : Icons.close_rounded,
                                       iconSize: 18,
                                       scale: 1.5,
                                       onTap: () async {
@@ -558,7 +603,9 @@ class _SignInWithGoogleFlyInState extends State<SignInWithGoogleFlyIn> {
                           ),
                           Padding(
                             padding: const EdgeInsetsDirectional.symmetric(
-                                horizontal: 22, vertical: 12),
+                              horizontal: 22,
+                              vertical: 12,
+                            ),
                             child: Button(
                               label: "Continue with Google",
                               onTap: () async {
@@ -568,14 +615,18 @@ class _SignInWithGoogleFlyInState extends State<SignInWithGoogleFlyIn> {
                                 });
                               },
                               color: Theme.of(context).colorScheme.primary,
-                              textColor:
-                                  Theme.of(context).colorScheme.onPrimary,
+                              textColor: Theme.of(
+                                context,
+                              ).colorScheme.onPrimary,
                               borderRadius: 5,
                             ),
                           ),
                           Padding(
                             padding: const EdgeInsetsDirectional.only(
-                                start: 22, end: 22, bottom: 22),
+                              start: 22,
+                              end: 22,
+                              bottom: 22,
+                            ),
                             child: TextFont(
                               text: "onboarding-info-3".tr(),
                               maxLines: 10,
